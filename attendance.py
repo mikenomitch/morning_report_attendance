@@ -38,19 +38,34 @@ def file_paths():
     return paths
 
 
+def handle_row(i, df):
+    badge_as_num = df['Badge'][i]
+    if not math.isnan(badge_as_num):
+        tally_for_res = None
+        badge_as_int = int(badge_as_num)
+        tally_for_res = id_to_attendance.get(badge_as_int, 0)
+        id_to_attendance[badge_as_int] = tally_for_res + 1
+
+
 files = file_paths()
 for file_name in files:
+    print("handing - " + file_name)
     dataframe = pd.read_excel(file_name, index_row=0)
     first_column = dataframe.columns[0]
 
-    if first_column == 'Badge' or first_column == 'ID':
+    if first_column == 'Badge':
         for i in dataframe.index:
-            badge_as_num = dataframe[first_column][i]
-            if not math.isnan(badge_as_num):
-                tally_for_res = None
-                badge_as_int = int(badge_as_num)
-                tally_for_res = id_to_attendance.get(badge_as_int, 0)
-                id_to_attendance[badge_as_int] = tally_for_res + 1
+            handle_row(i, dataframe)
+    elif first_column == 'ID':
+        new_dataframe = pd.read_excel(
+            file_name, sheet_name="SIGN IN", index_row=0)
+        new_first_col = new_dataframe.columns[0]
+        print("new_first_col = " + new_first_col)
+        if new_first_col == 'Badge':
+            for j in new_dataframe.index:
+                handle_row(j, new_dataframe)
+        else:
+            print("SOME ISSUE" + file_name)
     else:
         print("MANUALLY MARK: " + file_name)
 
