@@ -21,7 +21,7 @@ id_to_name = {}
 df = pd.read_excel(master_file_path, index_row=0)
 
 for i in df.index:
-    id = df['ID'][i]
+    id = int(df['ID'][i])
     name = df['Resident Name'][i]
     id_to_name[id] = name
 
@@ -48,6 +48,17 @@ def handle_df(dataframe):
             id_to_attendance[badge_as_int] = tally_for_res + 1
 
 
+def add_names(dataframe):
+    for i in dataframe.index:
+        id = dataframe['ID'][i]
+        if not math.isnan(id):
+            is_as_int = int(id)
+            name = dataframe['Resident Name'][i]
+            if not (is_as_int in id_to_name):
+                print("ADDING NAME - " + name + " as - " + str(is_as_int))
+                id_to_name[is_as_int] = name
+
+
 files = file_paths()
 for file_name in files:
     dataframe = pd.read_excel(file_name, index_row=0)
@@ -56,6 +67,7 @@ for file_name in files:
     if first_column == 'Badge':
         handle_df(dataframe)
     elif first_column == 'ID':
+        add_names(dataframe)
         next_sheet_df = pd.read_excel(
             file_name, sheet_name="SIGN IN", index_row=0)
         new_first_col = next_sheet_df.columns[0]
@@ -77,4 +89,4 @@ for key in id_to_attendance:
             str(count) + " times."
         print(line)
     else:
-        print("Unknown Badge: " + str(key))
+        print("Unknown Badge: " + str(key) + "came " + str(count) + " times.")
